@@ -1,0 +1,906 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>萨提亚情绪冰山理论 - Satir Iceberg Model</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --water-line: 35%;
+            --ice-blue: #e0f2fe;
+            --deep-blue: #0c4a6e;
+            --ocean-dark: #0f172a;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(180deg, #0f172a 0%, #1e3a5f 50%, #0ea5e9 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .serif {
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        /* Water effect */
+        .ocean {
+            position: relative;
+            background: linear-gradient(180deg, 
+                rgba(14, 165, 233, 0.3) 0%, 
+                rgba(15, 23, 42, 0.9) 100%);
+        }
+
+        .water-surface {
+            position: absolute;
+            top: var(--water-line);
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.8) 50%, 
+                transparent 100%);
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+            z-index: 10;
+        }
+
+        .water-surface::before,
+        .water-surface::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 100px;
+            height: 2px;
+            background: rgba(255,255,255,0.6);
+            animation: wave 3s ease-in-out infinite;
+        }
+
+        .water-surface::before { left: 20%; animation-delay: 0s; }
+        .water-surface::after { right: 20%; animation-delay: 1.5s; }
+
+        @keyframes wave {
+            0%, 100% { transform: translateX(0) scaleX(1); opacity: 0.6; }
+            50% { transform: translateX(20px) scaleX(1.5); opacity: 0.3; }
+        }
+
+        /* Iceberg layers */
+        .iceberg-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 800px;
+        }
+
+        .iceberg-layer {
+            position: relative;
+            margin: 0 auto;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .iceberg-layer:hover {
+            transform: scale(1.02) translateX(5px);
+            filter: brightness(1.1);
+        }
+
+        .layer-content {
+            background: linear-gradient(135deg, 
+                rgba(255,255,255,0.95) 0%, 
+                rgba(224, 242, 254, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.5);
+            box-shadow: 
+                0 10px 40px rgba(0,0,0,0.1),
+                inset 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        .layer-above .layer-content {
+            background: linear-gradient(135deg, 
+                rgba(255,255,255,0.98) 0%, 
+                rgba(186, 230, 253, 0.95) 100%);
+            border-color: rgba(125, 211, 252, 0.8);
+        }
+
+        .layer-below .layer-content {
+            background: linear-gradient(135deg, 
+                rgba(14, 165, 233, 0.15) 0%, 
+                rgba(8, 145, 178, 0.25) 100%);
+            border-color: rgba(14, 165, 233, 0.4);
+            color: #e0f2fe;
+        }
+
+        /* Triangle shapes for iceberg */
+        .shape-behavior {
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            width: 120px;
+            height: 80px;
+        }
+
+        .shape-coping {
+            clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+            width: 200px;
+            height: 60px;
+        }
+
+        .shape-feeling {
+            clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%);
+            width: 280px;
+            height: 70px;
+        }
+
+        .shape-feeling2 {
+            clip-path: polygon(3% 0%, 97% 0%, 100% 100%, 0% 100%);
+            width: 340px;
+            height: 65px;
+        }
+
+        .shape-perception {
+            clip-path: polygon(2% 0%, 98% 0%, 100% 100%, 0% 100%);
+            width: 400px;
+            height: 75px;
+        }
+
+        .shape-expectation {
+            clip-path: polygon(1% 0%, 99% 0%, 100% 100%, 0% 100%);
+            width: 460px;
+            height: 70px;
+        }
+
+        .shape-yearning {
+            clip-path: polygon(0.5% 0%, 99.5% 0%, 100% 100%, 0% 100%);
+            width: 520px;
+            height: 80px;
+        }
+
+        .shape-self {
+            clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+            width: 580px;
+            height: 100px;
+        }
+
+        /* Detail panel */
+        .detail-panel {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .detail-panel.active {
+            transform: translateX(0);
+        }
+
+        /* Floating bubbles */
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(255,255,255,0.8), 
+                rgba(255,255,255,0.2));
+            border-radius: 50%;
+            animation: float-up 8s ease-in infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float-up {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
+        }
+
+        /* Coping stances cards */
+        .stance-card {
+            background: linear-gradient(135deg, 
+                rgba(255,255,255,0.1) 0%, 
+                rgba(255,255,255,0.05) 100%);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .stance-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(125, 211, 252, 0.5);
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+        }
+
+        /* Progress indicator */
+        .depth-indicator {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 50;
+        }
+
+        .depth-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .depth-dot.active {
+            background: #38bdf8;
+            box-shadow: 0 0 15px #38bdf8;
+            transform: scale(1.3);
+        }
+
+        .depth-dot::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .depth-dot:hover::after {
+            opacity: 1;
+        }
+
+        /* Glow effects */
+        .glow-text {
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+        }
+
+        /* Interactive highlight */
+        .layer-active .layer-content {
+            box-shadow: 
+                0 0 30px rgba(56, 189, 248, 0.6),
+                inset 0 0 20px rgba(255,255,255,0.3);
+            border-color: #38bdf8;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Introduction section */
+        .intro-section {
+            background: linear-gradient(180deg, 
+                rgba(15, 23, 42, 0.9) 0%, 
+                rgba(30, 58, 95, 0.8) 100%);
+        }
+
+        /* Quote styling */
+        .quote-mark {
+            font-size: 4rem;
+            line-height: 1;
+            color: rgba(56, 189, 248, 0.3);
+            font-family: serif;
+        }
+    </style>
+</head>
+<body class="text-slate-100">
+    <!-- Floating Bubbles Background -->
+    <div id="bubblesContainer" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- Depth Indicator -->
+    <div class="depth-indicator hidden lg:block">
+        <div class="depth-dot active" data-label="行为" onclick="scrollToLayer('behavior')"></div>
+        <div class="depth-dot" data-label="应对" onclick="scrollToLayer('coping')"></div>
+        <div class="depth-dot" data-label="感受" onclick="scrollToLayer('feeling')"></div>
+        <div class="depth-dot" data-label="感受的感受" onclick="scrollToLayer('feeling2')"></div>
+        <div class="depth-dot" data-label="观点" onclick="scrollToLayer('perception')"></div>
+        <div class="depth-dot" data-label="期待" onclick="scrollToLayer('expectation')"></div>
+        <div class="depth-dot" data-label="渴望" onclick="scrollToLayer('yearning')"></div>
+        <div class="depth-dot" data-label="自我" onclick="scrollToLayer('self')"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="relative z-10 min-h-screen flex items-center justify-center px-4">
+        <div class="text-center max-w-4xl mx-auto">
+            <div class="mb-6 inline-block">
+                <span class="px-4 py-1 rounded-full bg-sky-500/20 text-sky-300 text-sm border border-sky-500/30">
+                    维吉尼亚·萨提亚 (Virginia Satir, 1916-1988)
+                </span>
+            </div>
+            <h1 class="serif text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-sky-200 glow-text">
+                情绪冰山理论
+            </h1>
+            <p class="text-xl md:text-2xl text-sky-100/80 mb-8 font-light">
+                探索行为背后的内在世界，遇见真实的自己
+            </p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center text-sm text-slate-400">
+                <span class="flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                    向下滚动探索冰山
+                </span>
+                <span class="hidden md:inline">|</span>
+                <span>点击各层查看详情</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Introduction -->
+    <section class="intro-section relative z-10 py-20 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex gap-6 items-start">
+                <div class="quote-mark">"</div>
+                <div>
+                    <p class="text-lg md:text-xl leading-relaxed text-slate-300 mb-4">
+                        一个人的自我就像一座漂浮在水面上的巨大冰山，能够被外界看到的行为表现或应对方式，只是露在水面上很小的一部分，大约只有<strong class="text-sky-400">八分之一</strong>露出水面，另外的<strong class="text-sky-400">八分之七</strong>藏在水底。
+                    </p>
+                    <p class="text-slate-400 text-sm">
+                        —— 维吉尼亚·萨提亚，美国最具影响力的首席心理治疗大师 [^32^]
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-12 grid md:grid-cols-3 gap-6">
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                    <div class="text-3xl mb-3">🧊</div>
+                    <h3 class="font-semibold text-sky-300 mb-2">隐喻的力量</h3>
+                    <p class="text-sm text-slate-400">用冰山的可见与不可见部分，比喻人类外显行为与内在体验的层次结构</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                    <div class="text-3xl mb-3">🔍</div>
+                    <h3 class="font-semibold text-sky-300 mb-2">深度探索</h3>
+                    <p class="text-sm text-slate-400">从表面的行为出发，逐层深入至渴望与自我，理解行为背后的深层动机</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                    <div class="text-3xl mb-3">💡</div>
+                    <h3 class="font-semibold text-sky-300 mb-2">转化与成长</h3>
+                    <p class="text-sm text-slate-400">当内在发生改变，外在的问题往往不再是问题，实现表里一致的生命状态</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Iceberg Visualization -->
+    <main class="relative z-10 pb-32">
+        <div class="water-surface"></div>
+
+        <div class="iceberg-container px-4 py-20 space-y-2">
+
+            <!-- 1. 行为 Behavior -->
+            <div id="behavior" class="iceberg-layer layer-above" onclick="showDetail('behavior')">
+                <div class="layer-content shape-behavior flex items-end justify-center pb-2 mx-auto">
+                    <div class="text-center">
+                        <div class="text-xs font-bold text-sky-700 mb-1">行为</div>
+                        <div class="text-[10px] text-sky-600">Behavior</div>
+                    </div>
+                </div>
+                <div class="text-center mt-2 text-xs text-slate-400 opacity-0 hover:opacity-100 transition-opacity">
+                    点击探索 ↑
+                </div>
+            </div>
+
+            <!-- 2. 应对方式 Coping -->
+            <div id="coping" class="iceberg-layer layer-below" onclick="showDetail('coping')">
+                <div class="layer-content shape-coping flex items-center justify-center mx-auto">
+                    <div class="text-center px-8">
+                        <div class="text-sm font-bold text-sky-100 mb-1">应对方式</div>
+                        <div class="text-xs text-sky-300/70">Coping Stances</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 感受 Feelings -->
+            <div id="feeling" class="iceberg-layer layer-below" onclick="showDetail('feeling')">
+                <div class="layer-content shape-feeling flex items-center justify-center mx-auto">
+                    <div class="text-center px-12">
+                        <div class="text-base font-bold text-sky-100 mb-1">感受</div>
+                        <div class="text-xs text-sky-300/70">喜悦、愤怒、悲伤、恐惧...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 感受的感受 Feelings about Feelings -->
+            <div id="feeling2" class="iceberg-layer layer-below" onclick="showDetail('feeling2')">
+                <div class="layer-content shape-feeling2 flex items-center justify-center mx-auto">
+                    <div class="text-center px-12">
+                        <div class="text-sm font-bold text-sky-100 mb-1">感受的感受</div>
+                        <div class="text-xs text-sky-300/70">对情绪的评价与决定</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. 观点 Perceptions -->
+            <div id="perception" class="iceberg-layer layer-below" onclick="showDetail('perception')">
+                <div class="layer-content shape-perception flex items-center justify-center mx-auto">
+                    <div class="text-center px-16">
+                        <div class="text-lg font-bold text-sky-100 mb-1">观点</div>
+                        <div class="text-xs text-sky-300/70">信念、价值观、认知模式</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. 期待 Expectations -->
+            <div id="expectation" class="iceberg-layer layer-below" onclick="showDetail('expectation')">
+                <div class="layer-content shape-expectation flex items-center justify-center mx-auto">
+                    <div class="text-center px-20">
+                        <div class="text-lg font-bold text-sky-100 mb-1">期待</div>
+                        <div class="text-xs text-sky-300/70">对自己、对他人、来自他人的期待</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. 渴望 Yearnings -->
+            <div id="yearning" class="iceberg-layer layer-below" onclick="showDetail('yearning')">
+                <div class="layer-content shape-yearning flex items-center justify-center mx-auto">
+                    <div class="text-center px-24">
+                        <div class="text-xl font-bold text-sky-100 mb-1">渴望</div>
+                        <div class="text-xs text-sky-300/70">被爱、被接纳、被认可、自由、安全感</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. 自我 Self -->
+            <div id="self" class="iceberg-layer layer-below" onclick="showDetail('self')">
+                <div class="layer-content shape-self flex items-start justify-center pt-4 mx-auto">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-sky-100 mb-1">自我</div>
+                        <div class="text-xs text-sky-300/70">生命力、精神、本质</div>
+                        <div class="mt-2 text-3xl">✦</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Water Label -->
+        <div class="absolute top-[35%] left-4 lg:left-20 text-slate-500 text-sm font-medium -rotate-90 origin-left">
+            水平面 · 意识界限
+        </div>
+    </main>
+
+    <!-- Coping Stances Section -->
+    <section class="relative z-10 py-20 px-4 bg-slate-900/50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="serif text-3xl md:text-4xl font-bold text-center mb-4">四种生存姿态</h2>
+            <p class="text-center text-slate-400 mb-12 max-w-2xl mx-auto">
+                当面临压力或威胁时，人们为了求生存、保护自我价值而采取的自动化反应模式 [^32^]
+            </p>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Placating -->
+                <div class="stance-card rounded-2xl p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-yellow-500/20 flex items-center justify-center text-3xl">
+                        🙇
+                    </div>
+                    <h3 class="font-bold text-yellow-400 mb-2">讨好型</h3>
+                    <p class="text-xs text-slate-400 mb-3">Placating</p>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        忽略自己，迎合他人<br>
+                        <span class="text-xs text-slate-500 italic">"只要我让你高兴，你就不会伤害我"</span>
+                    </p>
+                </div>
+
+                <!-- Blaming -->
+                <div class="stance-card rounded-2xl p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center text-3xl">
+                        👉
+                    </div>
+                    <h3 class="font-bold text-red-400 mb-2">指责型</h3>
+                    <p class="text-xs text-slate-400 mb-3">Blaming</p>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        保护自己，攻击他人<br>
+                        <span class="text-xs text-slate-500 italic">"只要我显得强大，你就不能伤害我"</span>
+                    </p>
+                </div>
+
+                <!-- Super-reasonable -->
+                <div class="stance-card rounded-2xl p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/20 flex items-center justify-center text-3xl">
+                        📊
+                    </div>
+                    <h3 class="font-bold text-blue-400 mb-2">超理智型</h3>
+                    <p class="text-xs text-slate-400 mb-3">Super-reasonable</p>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        隔离情感，只讲道理<br>
+                        <span class="text-xs text-slate-500 italic">"只要我不带感情，你就无法伤害我"</span>
+                    </p>
+                </div>
+
+                <!-- Irrelevant -->
+                <div class="stance-card rounded-2xl p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-500/20 flex items-center justify-center text-3xl">
+                        🌀
+                    </div>
+                    <h3 class="font-bold text-purple-400 mb-2">打岔型</h3>
+                    <p class="text-xs text-slate-400 mb-3">Irrelevant</p>
+                    <p class="text-sm text-slate-300 leading-relaxed">
+                        转移话题，逃避问题<br>
+                        <span class="text-xs text-slate-500 italic">"只要我不在场，你就无法伤害我"</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Congruent -->
+            <div class="mt-8 max-w-2xl mx-auto">
+                <div class="stance-card rounded-2xl p-8 text-center border-green-500/30 bg-green-500/10">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center text-4xl">
+                        🌱
+                    </div>
+                    <h3 class="font-bold text-green-400 mb-2 text-xl">表里一致型 · Congruent</h3>
+                    <p class="text-slate-300 leading-relaxed">
+                        理想状态：真实地表达自己的感受和需求，同时尊重他人。<br>
+                        在乎自己、在乎情境、在乎他人，达到身心合一的完整状态。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detail Side Panel -->
+    <div id="detailPanel" class="detail-panel fixed top-0 right-0 h-full w-full md:w-[480px] z-50 overflow-y-auto p-8">
+        <button onclick="closeDetail()" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div id="detailContent" class="mt-12">
+            <!-- Content injected by JS -->
+        </div>
+    </div>
+
+    <!-- Practical Application -->
+    <section class="relative z-10 py-20 px-4">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="serif text-3xl font-bold text-center mb-12">实践应用：如何探索冰山</h2>
+
+            <div class="space-y-6">
+                <div class="flex gap-4 items-start">
+                    <div class="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 font-bold text-sm shrink-0">1</div>
+                    <div>
+                        <h4 class="font-semibold text-sky-300 mb-1">觉察行为</h4>
+                        <p class="text-slate-400 text-sm">观察自己或他人的外在行为表现，不评判，只是看见。</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start">
+                    <div class="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 font-bold text-sm shrink-0">2</div>
+                    <div>
+                        <h4 class="font-semibold text-sky-300 mb-1">识别应对姿态</h4>
+                        <p class="text-slate-400 text-sm">压力下，你是讨好、指责、超理智还是打岔？看见自己的自动化反应。</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start">
+                    <div class="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 font-bold text-sm shrink-0">3</div>
+                    <div>
+                        <h4 class="font-semibold text-sky-300 mb-1">联结感受</h4>
+                        <p class="text-slate-400 text-sm">问自己："我现在的感受是什么？"允许情绪存在，不逃避。</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start">
+                    <div class="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 font-bold text-sm shrink-0">4</div>
+                    <div>
+                        <h4 class="font-semibold text-sky-300 mb-1">探索观点与期待</h4>
+                        <p class="text-slate-400 text-sm">是什么样的信念在影响我？我对自己和他人有什么期待？</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start">
+                    <div class="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 font-bold text-sm shrink-0">5</div>
+                    <div>
+                        <h4 class="font-semibold text-sky-300 mb-1">触及渴望与自我</h4>
+                        <p class="text-slate-400 text-sm">最深层的渴望是什么？是爱、接纳、认可还是安全感？连接生命力的核心。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-12 px-4 border-t border-white/10 bg-slate-900/80">
+        <div class="max-w-4xl mx-auto text-center">
+            <p class="text-slate-500 text-sm">
+                萨提亚模式帮助我们从家庭和社会系统的角度，系统地理解个体的困境，实现内在心理与外在行为的完整统一。
+            </p>
+            <p class="text-slate-600 text-xs mt-4">
+                参考资料：《萨提亚家庭治疗模式》《新家庭如何塑造人》《萨提亚深层沟通力》
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Detail data for each layer
+        const layerData = {
+            behavior: {
+                title: "行为 · Behavior",
+                subtitle: "冰山露出水面的部分",
+                icon: "🎭",
+                color: "text-sky-600",
+                content: `
+                    <p class="mb-4">这是我们能被外界直接观察到的言行举止，是内在世界的外在表现。</p>
+                    <div class="bg-white/5 rounded-lg p-4 mb-4">
+                        <h5 class="font-semibold mb-2 text-sky-300">包含要素：</h5>
+                        <ul class="space-y-1 text-sm text-slate-300">
+                            <li>• 语言内容（说什么）</li>
+                            <li>• 语音语调（怎么说）</li>
+                            <li>• 面部表情与肢体语言</li>
+                            <li>• 具体行动与故事内容</li>
+                        </ul>
+                    </div>
+                    <p class="text-sm text-slate-400 italic">"行为只是冰山一角，理解一个人不能只看表面行为。"</p>
+                `
+            },
+            coping: {
+                title: "应对方式 · Coping Stances",
+                subtitle: "水平面下的第一层：生存姿态",
+                icon: "🛡️",
+                color: "text-sky-400",
+                content: `
+                    <p class="mb-4">当面临压力或威胁时，人们为了求生存、保护自我价值而采取的自动化反应模式。</p>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-yellow-500/10 rounded p-3 text-center">
+                            <div class="text-2xl mb-1">🙇</div>
+                            <div class="text-xs text-yellow-400">讨好</div>
+                        </div>
+                        <div class="bg-red-500/10 rounded p-3 text-center">
+                            <div class="text-2xl mb-1">👉</div>
+                            <div class="text-xs text-red-400">指责</div>
+                        </div>
+                        <div class="bg-blue-500/10 rounded p-3 text-center">
+                            <div class="text-2xl mb-1">📊</div>
+                            <div class="text-xs text-blue-400">超理智</div>
+                        </div>
+                        <div class="bg-purple-500/10 rounded p-3 text-center">
+                            <div class="text-2xl mb-1">🌀</div>
+                            <div class="text-xs text-purple-400">打岔</div>
+                        </div>
+                    </div>
+                    <p class="text-sm">理想状态是<strong class="text-green-400">表里一致</strong>：在乎自己、在乎情境、在乎他人。</p>
+                `
+            },
+            feeling: {
+                title: "感受 · Feelings",
+                subtitle: "情绪的真实体验",
+                icon: "💙",
+                color: "text-sky-300",
+                content: `
+                    <p class="mb-4">由事件引发的情绪反应，这是最容易被我们意识到的内在部分。</p>
+                    <div class="bg-white/5 rounded-lg p-4 mb-4">
+                        <h5 class="font-semibold mb-3 text-sky-300">基本情绪类型：</h5>
+                        <div class="grid grid-cols-4 gap-2 text-center text-2xl">
+                            <div class="bg-yellow-500/20 rounded p-2">😊</div>
+                            <div class="bg-red-500/20 rounded p-2">😠</div>
+                            <div class="bg-blue-500/20 rounded p-2">😢</div>
+                            <div class="bg-purple-500/20 rounded p-2">😨</div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 text-center text-xs mt-2 text-slate-400">
+                            <div>喜悦</div>
+                            <div>愤怒</div>
+                            <div>悲伤</div>
+                            <div>恐惧</div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-400">还包括：兴奋、着迷、受伤、慌乱、烦躁、沮丧、无奈、孤独...</p>
+                `
+            },
+            feeling2: {
+                title: "感受的感受 · Feelings about Feelings",
+                subtitle: "对情绪的评价与决定",
+                icon: "🔄",
+                color: "text-sky-300",
+                content: `
+                    <p class="mb-4">对"感受"的评判和态度，决定了我们是否允许自己体验真实的情绪。</p>
+                    <div class="space-y-3 mb-4">
+                        <div class="bg-red-500/10 rounded p-3 border-l-2 border-red-400">
+                            <p class="text-sm text-red-300">❌ 压抑型</p>
+                            <p class="text-xs text-slate-400">"我不应该生气" → 自责、羞耻</p>
+                        </div>
+                        <div class="bg-green-500/10 rounded p-3 border-l-2 border-green-400">
+                            <p class="text-sm text-green-300">✓ 接纳型</p>
+                            <p class="text-xs text-slate-400">"我可以感到愤怒，这很正常" → 允许、接纳</p>
+                        </div>
+                    </div>
+                    <p class="text-sm">这一层往往决定了情绪是否被表达或压抑，影响后续的应对方式。</p>
+                `
+            },
+            perception: {
+                title: "观点 · Perceptions",
+                subtitle: "认知与信念系统",
+                icon: "👁️",
+                color: "text-sky-300",
+                content: `
+                    <p class="mb-4">信念、价值观、规条和认知。我们如何看待这个世界，以及对自己、他人和情境的看法。</p>
+                    <div class="bg-white/5 rounded-lg p-4 mb-4 space-y-2">
+                        <div class="flex items-start gap-2">
+                            <span class="text-sky-400">▸</span>
+                            <span class="text-sm">家庭规条："男儿有泪不轻弹"</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-sky-400">▸</span>
+                            <span class="text-sm">信念假设："我必须完美才值得被爱"</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-sky-400">▸</span>
+                            <span class="text-sm">主观现实："世界是不安全的"</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-sky-400">▸</span>
+                            <span class="text-sm">认知图式：对自我价值的判断</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-400">观点往往形成于童年，影响着我们的情绪反应和行为模式。</p>
+                `
+            },
+            expectation: {
+                title: "期待 · Expectations",
+                subtitle: "未满足的希望",
+                icon: "🎯",
+                color: "text-sky-300",
+                content: `
+                    <p class="mb-4">对自己、对他人或来自他人的期望。未被满足的期待往往是痛苦的来源。</p>
+                    <div class="grid grid-cols-1 gap-3 mb-4">
+                        <div class="bg-white/5 rounded p-3">
+                            <div class="text-sky-400 text-sm font-semibold mb-1">对自己的期待</div>
+                            <p class="text-xs text-slate-400">"我应该更努力"、"我不应该犯错"</p>
+                        </div>
+                        <div class="bg-white/5 rounded p-3">
+                            <div class="text-sky-400 text-sm font-semibold mb-1">对他人的期待</div>
+                            <p class="text-xs text-slate-400">"你应该理解我"、"你应该更体贴"</p>
+                        </div>
+                        <div class="bg-white/5 rounded p-3">
+                            <div class="text-sky-400 text-sm font-semibold mb-1">来自他人的期待</div>
+                            <p class="text-xs text-slate-400">父母、伴侣、社会对"我"的期待</p>
+                        </div>
+                    </div>
+                    <p class="text-sm">识别期待是化解内心冲突的关键，让我们看清什么是合理的，什么是需要放下的。</p>
+                `
+            },
+            yearning: {
+                title: "渴望 · Yearnings",
+                subtitle: "人类共通的心理需求",
+                icon: "✨",
+                color: "text-sky-300",
+                content: `
+                    <p class="mb-4">人类共通的、最深层的心理需求，不因具体的人或事而改变。</p>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-pink-500/10 rounded p-3 text-center">
+                            <div class="text-2xl mb-1">❤️</div>
+                            <div class="text-xs">被爱</div>
+                        </div>
+                        <div class="bg-green-500/10 rounded p-3 text-center">
+                            <div class="text-2xl mb-1">🤝</div>
+                            <div class="text-xs">被接纳</div>
+                        </div>
+                        <div class="bg-yellow-500/10 rounded p-3 text-center">
+                            <div class="text-2xl mb-1">⭐</div>
+                            <div class="text-xs">被认可</div>
+                        </div>
+                        <div class="bg-purple-500/10 rounded p-3 text-center">
+                            <div class="text-2xl mb-1">🦋</div>
+                            <div class="text-xs">自由</div>
+                        </div>
+                        <div class="bg-blue-500/10 rounded p-3 text-center">
+                            <div class="text-2xl mb-1">🏠</div>
+                            <div class="text-xs">归属感</div>
+                        </div>
+                        <div class="bg-orange-500/10 rounded p-3 text-center">
+                            <div class="text-2xl mb-1">🛡️</div>
+                            <div class="text-xs">安全感</div>
+                        </div>
+                    </div>
+                    <p class="text-sm">渴望是普适的，连接渴望能让我们体验到高自我价值感。</p>
+                `
+            },
+            self: {
+                title: "自我 · The Self",
+                subtitle: "生命力的核心",
+                icon: "🌟",
+                color: "text-sky-300",
+                content: `
+                    <p class="mb-4">生命的能量、精神本质或"我是谁"。冰山的核心与根基。</p>
+                    <div class="bg-gradient-to-br from-sky-500/20 to-purple-500/20 rounded-lg p-6 mb-4 text-center border border-sky-500/30">
+                        <div class="text-4xl mb-3">💫</div>
+                        <p class="text-lg font-serif italic text-sky-200 mb-2">
+                            "我足够好，正如我本来的样子"
+                        </p>
+                        <p class="text-xs text-slate-400">I am enough, just as I am</p>
+                    </div>
+                    <p class="text-sm mb-3">当一个人能够连接并接纳自己的渴望时，就能体验到：</p>
+                    <ul class="space-y-1 text-sm text-slate-300">
+                        <li>• 高自我价值感</li>
+                        <li>• 表里一致的完整状态</li>
+                        <li>• 内在的平静与力量</li>
+                        <li>• 与生命力的深度连接</li>
+                    </ul>
+                `
+            }
+        };
+
+        // Create bubbles
+        function createBubbles() {
+            const container = document.getElementById('bubblesContainer');
+            for (let i = 0; i < 20; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                const size = Math.random() * 20 + 10;
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                bubble.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(bubble);
+            }
+        }
+        createBubbles();
+
+        // Show detail panel
+        function showDetail(layerId) {
+            const panel = document.getElementById('detailPanel');
+            const content = document.getElementById('detailContent');
+            const data = layerData[layerId];
+
+            if (data) {
+                content.innerHTML = `
+                    <div class="${data.color} text-5xl mb-4">${data.icon}</div>
+                    <h2 class="serif text-3xl font-bold mb-2">${data.title}</h2>
+                    <p class="text-sky-300/80 text-sm mb-8">${data.subtitle}</p>
+                    <div class="text-slate-300 leading-relaxed">
+                        ${data.content}
+                    </div>
+                `;
+                panel.classList.add('active');
+
+                // Highlight current layer
+                document.querySelectorAll('.iceberg-layer').forEach(l => l.classList.remove('layer-active'));
+                document.getElementById(layerId).classList.add('layer-active');
+            }
+        }
+
+        // Close detail panel
+        function closeDetail() {
+            const panel = document.getElementById('detailPanel');
+            panel.classList.remove('active');
+            document.querySelectorAll('.iceberg-layer').forEach(l => l.classList.remove('layer-active'));
+        }
+
+        // Scroll to layer
+        function scrollToLayer(layerId) {
+            const element = document.getElementById(layerId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                showDetail(layerId);
+            }
+        }
+
+        // Update depth indicator on scroll
+        window.addEventListener('scroll', () => {
+            const layers = ['behavior', 'coping', 'feeling', 'feeling2', 'perception', 'expectation', 'yearning', 'self'];
+            const scrollPos = window.scrollY + window.innerHeight / 2;
+
+            layers.forEach((layerId, index) => {
+                const element = document.getElementById(layerId);
+                const dot = document.querySelectorAll('.depth-dot')[index];
+
+                if (element) {
+                    const rect = element.getBoundingClientRect();
+                    const elementCenter = rect.top + rect.height / 2 + window.scrollY;
+
+                    if (Math.abs(scrollPos - elementCenter) < 100) {
+                        document.querySelectorAll('.depth-dot').forEach(d => d.classList.remove('active'));
+                        dot.classList.add('active');
+                    }
+                }
+            });
+        });
+
+        // Close panel on outside click
+        document.getElementById('detailPanel').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeDetail();
+            }
+        });
+    </script>
+</body>
+</html>

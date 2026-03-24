@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>当代大学生压力来源可视化</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            font-size: 1.5em;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 30px;
+            margin: 10px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            transition: width 1s ease;
+        }
+
+        .pressure-item {
+            margin: 15px 0;
+        }
+
+        .pressure-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .source-tag {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 15px;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .quote {
+            font-style: italic;
+            color: #555;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+            margin: 15px 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .dashboard { grid-template-columns: 1fr; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 当代大学生压力来源可视化</h1>
+            <p class="subtitle">基于2022-2024年心理健康调研数据 | 3·25心理健康日专题</p>
+        </header>
+
+        <div class="dashboard">
+            <!-- 核心指标卡片 -->
+            <div class="card full-width">
+                <div class="card-title">
+                    <span class="icon">📊</span>
+                    核心心理健康指标
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-number">24.1%</span>
+                        <span class="stat-label">抑郁检出率</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-number">12.3%</span>
+                        <span class="stat-label">焦虑检出率</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-number">78.3%</span>
+                        <span class="stat-label">感到压力较大</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-number">34.5%</span>
+                        <span class="stat-label">压力影响睡眠</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-number">1179万</span>
+                        <span class="stat-label">2024届毕业生</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-number">85%</span>
+                        <span class="stat-label">担心就业前景</span>
+                    </div>
+                </div>
+                <span class="source-tag">来源：中科院心理所《中国国民心理健康发展报告》2022、教育部2024</span>
+            </div>
+
+            <!-- 压力来源分布饼图 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🎯</span>
+                    压力来源分布
+                </div>
+                <div class="chart-container">
+                    <canvas id="pressureSourceChart"></canvas>
+                </div>
+                <span class="source-tag">基于多维度调研综合估算</span>
+            </div>
+
+            <!-- 学业压力细分 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">📚</span>
+                    学业压力维度
+                </div>
+                <div class="pressure-item">
+                    <div class="pressure-label">
+                        <span>绩点排名焦虑</span>
+                        <span>67%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 67%; background: #ff6b6b;">67%</div>
+                    </div>
+                </div>
+                <div class="pressure-item">
+                    <div class="pressure-label">
+                        <span>内卷感知严重</span>
+                        <span>41%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 41%; background: #feca57;">41%</div>
+                    </div>
+                </div>
+                <div class="pressure-item">
+                    <div class="pressure-label">
+                        <span>每日学习超8小时仍焦虑</span>
+                        <span>63%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 63%; background: #48dbfb;">63%</div>
+                    </div>
+                </div>
+                <span class="source-tag">来源：某985高校调研、中国高校传媒联盟</span>
+            </div>
+
+            <!-- 就业压力趋势 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">💼</span>
+                    就业压力趋势（2020-2024）
+                </div>
+                <div class="chart-container">
+                    <canvas id="employmentChart"></canvas>
+                </div>
+                <span class="source-tag">来源：教育部、智联招聘</span>
+            </div>
+
+            <!-- 人际关系与社交 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">👥</span>
+                    人际关系压力
+                </div>
+                <div class="chart-container">
+                    <canvas id="socialChart"></canvas>
+                </div>
+                <span class="source-tag">来源：高校心理咨询中心案例统计</span>
+            </div>
+
+            <!-- 心理健康对比 -->
+            <div class="card full-width">
+                <div class="card-title">
+                    <span class="icon">🧠</span>
+                    大学生 vs 普通人群心理健康状况对比
+                </div>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+                <div class="highlight">
+                    <div class="quote">
+                        "大学生群体抑郁、焦虑检出率显著高于普通职业人群，且呈现逐年上升趋势。压力来源从单一学业扩展到就业、经济、社交等多维度叠加。"
+                    </div>
+                </div>
+                <span class="source-tag">来源：中科院心理所2022、多省市高校心理普查</span>
+            </div>
+
+            <!-- 压力应对方式 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">🛠️</span>
+                    压力应对方式分布
+                </div>
+                <div class="chart-container">
+                    <canvas id="copingChart"></canvas>
+                </div>
+                <span class="source-tag">来源：高校学生心理健康调查</span>
+            </div>
+
+            <!-- 每日时间分配与压力 -->
+            <div class="card">
+                <div class="card-title">
+                    <span class="icon">⏰</span>
+                    大学生日均时间分配
+                </div>
+                <div class="chart-container">
+                    <canvas id="timeChart"></canvas>
+                </div>
+                <span class="source-tag">来源：中国互联网络信息中心</span>
+            </div>
+
+            <!-- 关键洞察 -->
+            <div class="card full-width">
+                <div class="card-title">
+                    <span class="icon">💡</span>
+                    关键洞察与建议
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 15px;">
+                    <div class="highlight">
+                        <h4>🔴 压力特征</h4>
+                        <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                            <li><strong>叠加性</strong>：学业+就业+经济多源并发</li>
+                            <li><strong>弥散性</strong>：缺乏明确边界与评价标准</li>
+                            <li><strong>竞争性</strong>：同辈参照系强烈</li>
+                        </ul>
+                    </div>
+                    <div class="highlight">
+                        <h4>🟢 应对策略</h4>
+                        <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                            <li>建立<strong>自我关怀routine</strong>，非暴力对待自己</li>
+                            <li>善用<strong>STOP-R情绪调节法</strong></li>
+                            <li>主动寻求<strong>专业心理支持</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>数据整理时间：2024年 | 仅供教育参考，非临床诊断依据</p>
+            <p style="margin-top: 10px;">🌟 善爱自我，逐光而行 —— 3·25心理健康日</p>
+        </footer>
+    </div>
+
+    <script>
+        // 配置Chart.js默认字体
+        Chart.defaults.font.family = "'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif";
+        Chart.defaults.color = '#666';
+
+        // 1. 压力来源分布饼图
+        const pressureSourceCtx = document.getElementById('pressureSourceChart').getContext('2d');
+        new Chart(pressureSourceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['学业压力', '就业焦虑', '人际关系', '经济压力', '自我认同', '健康生存'],
+                datasets: [{
+                    data: [28, 24, 18, 12, 12, 6],
+                    backgroundColor: [
+                        '#ff6b6b',  // 学业 - 红
+                        '#feca57',  // 就业 - 黄
+                        '#48dbfb',  // 人际 - 蓝
+                        '#ff9ff3',  // 经济 - 粉
+                        '#54a0ff',  // 自我 - 深蓝
+                        '#5f27cd'   // 健康 - 紫
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. 就业压力趋势折线图
+        const employmentCtx = document.getElementById('employmentChart').getContext('2d');
+        new Chart(employmentCtx, {
+            type: 'line',
+            data: {
+                labels: ['2020', '2021', '2022', '2023', '2024'],
+                datasets: [{
+                    label: '毕业生人数（万）',
+                    data: [874, 909, 1076, 1158, 1179],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: '就业焦虑比例（%）',
+                    data: [65, 72, 78, 82, 85],
+                    borderColor: '#ff6b6b',
+                    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: '毕业生人数（万）' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: '焦虑比例（%）' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+
+        // 3. 人际关系压力雷达图
+        const socialCtx = document.getElementById('socialChart').getContext('2d');
+        new Chart(socialCtx, {
+            type: 'radar',
+            data: {
+                labels: ['宿舍矛盾', '社交倦怠', '恋爱焦虑', '家庭张力', '同辈比较', '孤独感'],
+                datasets: [{
+                    label: '影响比例（%）',
+                    data: [28, 35, 22, 19, 45, 31],
+                    backgroundColor: 'rgba(72, 219, 251, 0.2)',
+                    borderColor: '#48dbfb',
+                    pointBackgroundColor: '#48dbfb',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#48dbfb'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 50,
+                        ticks: { stepSize: 10 }
+                    }
+                }
+            }
+        });
+
+        // 4. 心理健康对比柱状图
+        const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+        new Chart(comparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: ['抑郁检出率', '焦虑检出率', '睡眠问题', '压力感知'],
+                datasets: [{
+                    label: '大学生',
+                    data: [24.1, 12.3, 34.5, 78.3],
+                    backgroundColor: '#ff6b6b'
+                }, {
+                    label: '普通职业人群',
+                    data: [10.6, 7.8, 21.2, 45.2],
+                    backgroundColor: '#54a0ff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: { display: true, text: '比例（%）' }
+                    }
+                }
+            }
+        });
+
+        // 5. 压力应对方式饼图
+        const copingCtx = document.getElementById('copingChart').getContext('2d');
+        new Chart(copingCtx, {
+            type: 'pie',
+            data: {
+                labels: ['自我调节', '向朋友倾诉', '娱乐逃避', '运动释放', '专业求助', '压抑忽视'],
+                datasets: [{
+                    data: [32, 28, 18, 12, 5, 5],
+                    backgroundColor: [
+                        '#1dd1a1',  // 自我调节 - 绿
+                        '#54a0ff',  // 倾诉 - 蓝
+                        '#ff9f43',  // 逃避 - 橙
+                        '#5f27cd',  // 运动 - 紫
+                        '#00d2d3',  // 求助 - 青
+                        '#ff6b6b'   // 压抑 - 红
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // 6. 时间分配堆叠条形图
+        const timeCtx = document.getElementById('timeChart').getContext('2d');
+        new Chart(timeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['学习', '睡眠', '上网/社交', '兼职/实习', '运动', '其他'],
+                datasets: [{
+                    label: '日均小时数',
+                    data: [6.5, 7.2, 8.0, 1.5, 0.8, 0],
+                    backgroundColor: [
+                        '#ff6b6b',
+                        '#54a0ff',
+                        '#feca57',
+                        '#1dd1a1',
+                        '#5f27cd',
+                        '#ddd'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        max: 24,
+                        title: { display: true, text: '小时' }
+                    }
+                }
+            }
+        });
+
+        // 动画效果：进度条加载
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelectorAll('.progress-fill').forEach(bar => {
+                    bar.style.width = bar.style.width;
+                });
+            }, 500);
+        });
+    </script>
+</body>
+</html>

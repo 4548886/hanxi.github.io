@@ -1,0 +1,539 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的能量地图 - Energy Map</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        .energy-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: grab;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .energy-item:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+
+        .sun-item {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .cloud-item {
+            background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+            box-shadow: 0 0 30px rgba(100, 116, 139, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(2deg); }
+            66% { transform: translateY(5px) rotate(-2deg); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.6); }
+            50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.9); }
+        }
+
+        @keyframes cloud-drift {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(10px); }
+        }
+
+        .sun-glow {
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        .map-area {
+            background: radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(100, 116, 139, 0.1) 0%, transparent 50%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .input-glow:focus {
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+        }
+
+        .delete-btn {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .energy-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .stats-bar {
+            transition: width 0.5s ease-out;
+        }
+
+        .wisdom-card {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-left: 4px solid #fbbf24;
+        }
+    </style>
+</head>
+<body class="text-white p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500">
+                ☀️ 我的能量地图 ☁️
+            </h1>
+            <p class="text-gray-300 text-lg">发现你的能量来源，优化生活平衡</p>
+        </header>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Left Panel: Input Controls -->
+            <div class="glass-panel p-6 space-y-6">
+                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <span>✨</span> 添加能量标记
+                </h2>
+
+                <!-- Sun Input -->
+                <div class="space-y-3">
+                    <label class="flex items-center gap-2 text-yellow-400 font-medium">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+                        </svg>
+                        充电能量 (太阳)
+                    </label>
+                    <input type="text" id="sunInput" placeholder="例如：晨跑、阅读、和朋友聊天..." 
+                           class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 input-glow outline-none transition-all">
+                    <div class="flex gap-2">
+                        <input type="range" id="sunIntensity" min="1" max="5" value="3" 
+                               class="flex-1 accent-yellow-400" oninput="updateIntensityLabel('sun', this.value)">
+                        <span id="sunIntensityLabel" class="text-yellow-400 font-bold w-8 text-center">3</span>
+                    </div>
+                    <button onclick="addItem('sun')" 
+                            class="w-full py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 font-semibold hover:shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                        <span>☀️</span> 添加阳光
+                    </button>
+                </div>
+
+                <hr class="border-white/10">
+
+                <!-- Cloud Input -->
+                <div class="space-y-3">
+                    <label class="flex items-center gap-2 text-gray-400 font-medium">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z"/>
+                        </svg>
+                        消耗能量 (乌云)
+                    </label>
+                    <input type="text" id="cloudInput" placeholder="例如：熬夜、无效会议、拖延..." 
+                           class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-400 input-glow outline-none transition-all">
+                    <div class="flex gap-2">
+                        <input type="range" id="cloudIntensity" min="1" max="5" value="3" 
+                               class="flex-1 accent-gray-400" oninput="updateIntensityLabel('cloud', this.value)">
+                        <span id="cloudIntensityLabel" class="text-gray-400 font-bold w-8 text-center">3</span>
+                    </div>
+                    <button onclick="addItem('cloud')" 
+                            class="w-full py-3 rounded-xl bg-gradient-to-r from-gray-500 to-slate-600 font-semibold hover:shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                        <span>☁️</span> 添加乌云
+                    </button>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="pt-4">
+                    <p class="text-sm text-gray-400 mb-2">快速选择：</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="quickAdd('sun', '运动健身', 4)" class="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm hover:bg-yellow-500/30 transition">运动</button>
+                        <button onclick="quickAdd('sun', '深度睡眠', 5)" class="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm hover:bg-yellow-500/30 transition">睡眠</button>
+                        <button onclick="quickAdd('sun', '冥想', 3)" class="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm hover:bg-yellow-500/30 transition">冥想</button>
+                        <button onclick="quickAdd('cloud', '社交媒体', 3)" class="px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-sm hover:bg-gray-500/30 transition">刷手机</button>
+                        <button onclick="quickAdd('cloud', '加班', 4)" class="px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-sm hover:bg-gray-500/30 transition">加班</button>
+                        <button onclick="quickAdd('cloud', '负面新闻', 2)" class="px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-sm hover:bg-gray-500/30 transition">负面新闻</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center: Energy Map -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Stats Overview -->
+                <div class="glass-panel p-6">
+                    <h3 class="text-lg font-semibold mb-4">能量平衡指数</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-4">
+                            <span class="text-2xl">☀️</span>
+                            <div class="flex-1 bg-white/10 rounded-full h-4 overflow-hidden">
+                                <div id="sunBar" class="stats-bar h-full bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full" style="width: 50%"></div>
+                            </div>
+                            <span id="sunScore" class="font-bold text-yellow-400">0</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-2xl">☁️</span>
+                            <div class="flex-1 bg-white/10 rounded-full h-4 overflow-hidden">
+                                <div id="cloudBar" class="stats-bar h-full bg-gradient-to-r from-gray-400 to-slate-600 rounded-full" style="width: 50%"></div>
+                            </div>
+                            <span id="cloudScore" class="font-bold text-gray-400">0</span>
+                        </div>
+                    </div>
+                    <div id="balanceMessage" class="mt-4 p-3 rounded-lg bg-white/5 text-center text-sm">
+                        开始添加你的能量源吧！
+                    </div>
+                </div>
+
+                <!-- The Map -->
+                <div class="glass-panel p-6 min-h-[500px] map-area relative" id="mapArea">
+                    <!-- Background Stars -->
+                    <div class="absolute inset-0 pointer-events-none" id="starsContainer"></div>
+
+                    <!-- Legend -->
+                    <div class="absolute top-4 right-4 flex gap-4 text-sm">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                            <span>充电</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-gray-400"></div>
+                            <span>消耗</span>
+                        </div>
+                    </div>
+
+                    <!-- Items Container -->
+                    <div id="itemsContainer" class="relative h-full w-full">
+                        <!-- Items will be added here dynamically -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div class="text-center text-gray-400">
+                            <p class="text-6xl mb-4">🗺️</p>
+                            <p>你的能量地图还是空的</p>
+                            <p class="text-sm mt-2">在左侧添加阳光和乌云来绘制地图</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights Panel -->
+                <div class="glass-panel p-6" id="insightsPanel" style="display: none;">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <span>💡</span> 能量洞察与建议
+                    </h3>
+                    <div id="insightsContent" class="space-y-3">
+                        <!-- Dynamic insights will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Plan Section -->
+        <div class="mt-8 glass-panel p-6" id="actionPlan" style="display: none;">
+            <h2 class="text-2xl font-bold mb-6 text-center">🎯 我的能量优化计划</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-yellow-400 flex items-center gap-2">
+                        <span>☀️</span> 增加阳光行动
+                    </h3>
+                    <ul id="sunActions" class="space-y-2">
+                        <!-- Dynamic actions -->
+                    </ul>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-400 flex items-center gap-2">
+                        <span>☁️</span> 减少乌云策略
+                    </h3>
+                    <ul id="cloudActions" class="space-y-2">
+                        <!-- Dynamic actions -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let items = [];
+        let itemIdCounter = 0;
+
+        // Initialize stars background
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(star);
+            }
+        }
+        createStars();
+
+        function updateIntensityLabel(type, value) {
+            document.getElementById(type + 'IntensityLabel').textContent = value;
+        }
+
+        function addItem(type) {
+            const input = document.getElementById(type + 'Input');
+            const intensity = parseInt(document.getElementById(type + 'Intensity').value);
+            const text = input.value.trim();
+
+            if (!text) {
+                input.focus();
+                input.classList.add('ring-2', 'ring-red-500');
+                setTimeout(() => input.classList.remove('ring-2', 'ring-red-500'), 500);
+                return;
+            }
+
+            const item = {
+                id: itemIdCounter++,
+                type: type,
+                text: text,
+                intensity: intensity,
+                x: 20 + Math.random() * 60, // Random position 20-80%
+                y: 20 + Math.random() * 60
+            };
+
+            items.push(item);
+            renderItem(item);
+            input.value = '';
+            updateStats();
+            updateInsights();
+        }
+
+        function quickAdd(type, text, intensity) {
+            document.getElementById(type + 'Input').value = text;
+            document.getElementById(type + 'Intensity').value = intensity;
+            updateIntensityLabel(type, intensity);
+            addItem(type);
+        }
+
+        function renderItem(item) {
+            const container = document.getElementById('itemsContainer');
+            const emptyState = document.getElementById('emptyState');
+            emptyState.style.display = 'none';
+
+            const el = document.createElement('div');
+            el.className = `energy-item absolute px-4 py-3 rounded-2xl font-medium text-white shadow-lg ${item.type}-item`;
+            el.style.left = item.x + '%';
+            el.style.top = item.y + '%';
+            el.style.animationDelay = Math.random() * 2 + 's';
+            el.style.zIndex = 10;
+
+            // Size based on intensity
+            const scale = 0.8 + (item.intensity * 0.15);
+            el.style.transform = `scale(${scale})`;
+
+            const icon = item.type === 'sun' ? '☀️' : '☁️';
+            el.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">${icon}</span>
+                    <span>${item.text}</span>
+                    <span class="text-xs opacity-70">${'★'.repeat(item.intensity)}</span>
+                </div>
+                <button onclick="deleteItem(${item.id})" class="delete-btn absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full text-white text-xs flex items-center justify-center hover:bg-red-600 transition shadow-lg">×</button>
+            `;
+
+            // Make draggable
+            makeDraggable(el, item);
+
+            el.id = 'item-' + item.id;
+            container.appendChild(el);
+        }
+
+        function makeDraggable(el, itemData) {
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            el.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialLeft = el.offsetLeft;
+                initialTop = el.offsetTop;
+                el.style.zIndex = 1000;
+                el.style.cursor = 'grabbing';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                const parent = el.parentElement;
+                const newLeft = ((initialLeft + dx) / parent.offsetWidth) * 100;
+                const newTop = ((initialTop + dy) / parent.offsetHeight) * 100;
+
+                el.style.left = Math.max(5, Math.min(95, newLeft)) + '%';
+                el.style.top = Math.max(5, Math.min(95, newTop)) + '%';
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    el.style.zIndex = 10;
+                    el.style.cursor = 'grab';
+
+                    // Update item data
+                    itemData.x = parseFloat(el.style.left);
+                    itemData.y = parseFloat(el.style.top);
+                }
+            });
+        }
+
+        function deleteItem(id) {
+            items = items.filter(i => i.id !== id);
+            const el = document.getElementById('item-' + id);
+            if (el) {
+                el.style.transform = 'scale(0)';
+                setTimeout(() => el.remove(), 300);
+            }
+
+            if (items.length === 0) {
+                document.getElementById('emptyState').style.display = 'flex';
+            }
+            updateStats();
+            updateInsights();
+        }
+
+        function updateStats() {
+            const sunItems = items.filter(i => i.type === 'sun');
+            const cloudItems = items.filter(i => i.type === 'cloud');
+
+            const sunScore = sunItems.reduce((sum, i) => sum + i.intensity, 0);
+            const cloudScore = cloudItems.reduce((sum, i) => sum + i.intensity, 0);
+            const total = sunScore + cloudScore || 1;
+
+            document.getElementById('sunScore').textContent = sunScore;
+            document.getElementById('cloudScore').textContent = cloudScore;
+            document.getElementById('sunBar').style.width = (sunScore / total * 100) + '%';
+            document.getElementById('cloudBar').style.width = (cloudScore / total * 100) + '%';
+
+            const balanceMsg = document.getElementById('balanceMessage');
+            if (items.length === 0) {
+                balanceMsg.textContent = '开始添加你的能量源吧！';
+                balanceMsg.className = 'mt-4 p-3 rounded-lg bg-white/5 text-center text-sm';
+            } else if (sunScore > cloudScore * 1.5) {
+                balanceMsg.textContent = '☀️ 你的能量很充足！保持这个状态！';
+                balanceMsg.className = 'mt-4 p-3 rounded-lg bg-yellow-500/20 text-yellow-300 text-center text-sm border border-yellow-500/30';
+            } else if (cloudScore > sunScore * 1.2) {
+                balanceMsg.textContent = '⚠️ 注意能量消耗，试着增加更多充电活动';
+                balanceMsg.className = 'mt-4 p-3 rounded-lg bg-red-500/20 text-red-300 text-center text-sm border border-red-500/30';
+            } else {
+                balanceMsg.textContent = '✓ 能量相对平衡，继续观察调整';
+                balanceMsg.className = 'mt-4 p-3 rounded-lg bg-green-500/20 text-green-300 text-center text-sm border border-green-500/30';
+            }
+        }
+
+        function updateInsights() {
+            const insightsPanel = document.getElementById('insightsPanel');
+            const actionPlan = document.getElementById('actionPlan');
+            const insightsContent = document.getElementById('insightsContent');
+
+            if (items.length === 0) {
+                insightsPanel.style.display = 'none';
+                actionPlan.style.display = 'none';
+                return;
+            }
+
+            insightsPanel.style.display = 'block';
+            actionPlan.style.display = 'block';
+
+            const sunItems = items.filter(i => i.type === 'sun').sort((a, b) => b.intensity - a.intensity);
+            const cloudItems = items.filter(i => i.type === 'cloud').sort((a, b) => b.intensity - a.intensity);
+
+            let insights = [];
+
+            // Generate insights
+            if (sunItems.length > 0) {
+                const topSun = sunItems[0];
+                insights.push({
+                    type: 'positive',
+                    text: `<strong>${topSun.text}</strong> 是你最强的能量来源（强度 ${topSun.intensity}/5），建议每周至少安排 3 次。`
+                });
+            }
+
+            if (cloudItems.length > 0) {
+                const topCloud = cloudItems[0];
+                insights.push({
+                    type: 'warning',
+                    text: `<strong>${topCloud.text}</strong> 消耗你最多能量（强度 ${topCloud.intensity}/5），考虑设置界限或减少频率。`
+                });
+            }
+
+            if (sunItems.length < cloudItems.length) {
+                insights.push({
+                    type: 'tip',
+                    text: `你的充电源(${sunItems.length}个)少于消耗源(${cloudItems.length}个)，建议增加更多阳光活动。`
+                });
+            }
+
+            // Render insights
+            insightsContent.innerHTML = insights.map(insight => `
+                <div class="wisdom-card p-4 rounded-lg">
+                    <p class="text-sm leading-relaxed">${insight.text}</p>
+                </div>
+            `).join('');
+
+            // Generate action plans
+            const sunActions = document.getElementById('sunActions');
+            const cloudActions = document.getElementById('cloudActions');
+
+            sunActions.innerHTML = sunItems.slice(0, 3).map(item => `
+                <li class="flex items-start gap-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                    <span class="text-yellow-400 mt-0.5">☀️</span>
+                    <div>
+                        <p class="font-medium text-yellow-100">${item.text}</p>
+                        <p class="text-xs text-yellow-300/70 mt-1">建议：每周 ${item.intensity > 3 ? '3-4' : '2-3'} 次，每次专注投入</p>
+                    </div>
+                </li>
+            `).join('') || '<li class="text-gray-400 text-sm">添加充电活动来生成建议</li>';
+
+            cloudActions.innerHTML = cloudItems.slice(0, 3).map(item => `
+                <li class="flex items-start gap-3 p-3 rounded-lg bg-gray-500/10 border border-gray-500/20">
+                    <span class="text-gray-400 mt-0.5">☁️</span>
+                    <div>
+                        <p class="font-medium text-gray-300">${item.text}</p>
+                        <p class="text-xs text-gray-400 mt-1">策略：设定时间限制、寻找替代方案或委托他人</p>
+                    </div>
+                </li>
+            `).join('') || '<li class="text-gray-400 text-sm">添加消耗活动来生成策略</li>';
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (document.activeElement.id === 'sunInput') addItem('sun');
+                if (document.activeElement.id === 'cloudInput') addItem('cloud');
+            }
+        });
+    </script>
+</body>
+</html>
